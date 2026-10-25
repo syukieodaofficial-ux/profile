@@ -1,0 +1,137 @@
+@import "../public/assets/css/style.css";
+
+.admin-side nav a[aria-current="page"] {
+  color: var(--green);
+  background: #17221a;
+}
+
+.admin-error {
+  margin: 14px 0;
+}
+
+.action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.record-row[hidden] {
+  display: none;
+}
+
+.public-error {
+  width: min(1120px, calc(100% - 48px));
+  margin: 40px auto;
+  padding: 20px;
+  border: 1px solid #653339;
+  border-radius: 7px;
+  color: #ffadb1;
+  background: #241719;
+}
+
+.admin-side nav button.nav-logout {
+  width: 100%;
+  cursor: pointer;
+}
+
+.admin-side nav form {
+  margin: 0;
+}
+
+.image-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 9px;
+}
+
+.image-preview img {
+  width: 76px;
+  height: 76px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  object-fit: cover;
+}
+
+.admin-page-heading > div {
+  min-width: 0;
+}
+
+.admin-page-heading .button {
+  flex: 0 0 auto;
+}
+
+.lightbox-backdrop {
+  position: fixed;
+  z-index: 20;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 4vw;
+  background: rgb(3 5 4 / 91%);
+  backdrop-filter: blur(5px);
+}
+
+.lightbox-window {
+  position: relative;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) 42px;
+  align-items: center;
+  width: min(100%, 1000px);
+  max-height: 90vh;
+  padding: 36px 14px 14px;
+  border: 1px solid #405347;
+  border-radius: 8px;
+  background: #0d120f;
+}
+
+.lightbox-window > img {
+  grid-column: 2;
+  max-width: 100%;
+  max-height: 72vh;
+  margin: auto;
+  object-fit: contain;
+}
+
+.lightbox-window > p {
+  grid-column: 1 / -1;
+  margin: 12px 36px 0;
+  color: #c5d0c8;
+  text-align: center;
+  font-size: 12px;
+}
+
+.lightbox-window > button {
+  z-index: 1;
+  border: 0;
+  color: var(--green);
+  background: transparent;
+  cursor: pointer;
+  font-size: 24px;
+}
+
+.lightbox-window .lightbox-close {
+  position: absolute;
+  top: 6px;
+  right: 12px;
+}
+
+.lightbox-window .lightbox-prev {
+  grid-column: 1;
+}
+
+.lightbox-window .lightbox-next {
+  grid-column: 3;
+}
+
+button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+@media (max-width: 620px) {
+  .lightbox-window {
+    grid-template-columns: 34px minmax(0, 1fr) 34px;
+    padding-inline: 6px;
+  }
+}
