@@ -34,21 +34,21 @@ npm install
 npm run dev
 ```
 
-Open `http://localhost:3000`, then visit `/admin/setup` to create the first admin account. Admin passwords must be at least 12 characters. Sign in at `/admin/login`.
+Open `http://localhost:3000` and sign in at `/admin/login`. On the first sign-in attempt, the server creates the initial administrator from `ADMIN_USERNAME` and `ADMIN_PASSWORD` if the administrators table is empty. The password is hashed before it is stored. There is no public administrator sign-up page.
 
 ## Deploy to Vercel
 
 1. Import the repository into Vercel and select **Next.js**.
-2. In Vercel project settings, add `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`, and `SESSION_SECRET` as server/project environment variables. Use the same values as `.env.local`; never prefix the secret or session key with `NEXT_PUBLIC_`.
+2. In Vercel project settings, add `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`, `SESSION_SECRET`, `ADMIN_USERNAME`, and `ADMIN_PASSWORD` as environment variables. Set the admin username to `syukie`; enter a unique password of at least 12 characters in the private environment-variable form. Use the same values as `.env.local`; never prefix the secret, session key, or admin password with `NEXT_PUBLIC_`.
 3. Run `database/schema.sql` in the Supabase SQL Editor before the first deployment.
-4. Deploy. Visit the deployed `/admin/setup` once, create an admin, then sign in.
+4. Deploy, then sign in at `/admin/login`. The first sign-in initializes the admin account from the server-only environment variables. If an administrator already exists in the database, this bootstrap does not overwrite it.
 5. For local development and production, the upload actions accept up to 10 images/32 MiB per batch; Vercel's plan-specific request/body limits also apply.
 
 ## Features
 
 - Responsive, terminal-inspired portfolio with dynamic sections and source-based seed content.
 - Supabase-backed profile, About, education, skills, projects, gallery, achievements, contact links, settings, and contact inbox.
-- Protected dashboard, one-time admin setup, password changes, signed `HttpOnly` session cookies, login rate limiting, and Next.js Server Action origin protections.
+- Protected dashboard, server-configured initial admin provisioning, password changes, signed `HttpOnly` session cookies, login rate limiting, and Next.js Server Action origin protections.
 - Profile and gallery image preview and upload to Supabase Storage. The app validates image signatures, extensions, actual decodability and dimensions; accepts JPG/JPEG, PNG, GIF, and WebP only.
 - Gallery multi-upload, editing, deletion, sorting, publication, filtering, searching, pagination, and lightbox.
 - RLS is enabled for app tables without public policies. Server-side Supabase secret key operations do not expose admin permissions in the browser.
@@ -58,7 +58,7 @@ Open `http://localhost:3000`, then visit `/admin/setup` to create the first admi
 
 - **Supabase not configured:** verify `.env.local` names and values, restart `npm run dev`, and ensure both Project URL and server-only secret key are present.
 - **Unauthorized / permission errors:** run the full `database/schema.sql`; confirm the server-side key is a Supabase secret/service-role key, not just the publishable key.
-- **Setup says an admin exists:** sign in at `/admin/login`; setup is one-time.
+- **Initial admin sign-in fails:** confirm `ADMIN_USERNAME` and `ADMIN_PASSWORD` are set privately on the server and run the full `database/schema.sql`. Initial provisioning only runs when the administrators table is empty; an existing account is not overwritten.
 - **Uploads fail:** check the `portfolio-images` bucket was created by the schema and the Supabase secret key is configured. Confirm the image is a supported format under the size/dimension limits.
 - **Production deployment:** configure environment variables in Vercel, not in source. Never put the server secret or session secret in a `NEXT_PUBLIC_*` variable.
 

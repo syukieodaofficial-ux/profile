@@ -78,28 +78,25 @@ async function removeImage(key: unknown): Promise<void> {
   if (error) throw new Error(`Old image cleanup failed: ${error.message}`);
 }
 
-export async function setupAdmin(formData: FormData): Promise<void> {
-  const username = text(formData, "username", 80);
-  const password = String(formData.get("password") ?? "");
-  const confirmation = String(formData.get("password_confirm") ?? "");
-  if (!/^[a-zA-Z0-9_.-]{3,80}$/.test(username)) {
-    errorRedirect("/admin/setup", new Error("Use 3–80 letters, numbers, dots, hyphens, or underscores."));
-  }
-  if (password.length < 12 || password.length > 200) {
-    errorRedirect("/admin/setup", new Error("Choose a password between 12 and 200 characters."));
-  }
-  if (password !== confirmation) {
-    errorRedirect("/admin/setup", new Error("Password confirmation does not match."));
+async function provisionConfiguredAdmin(): Promise<void> {
+  const client = supabaseAdmin();
+  const { count, error: countError } = await client
+    .from("administrators")
+    .select("id", { count: "exact", head: true });
+  if (countError) throw new Error("The sign-in service is unavailable.");
+  if ((count ?? 0) > 0) return;
+
+  const username = process.env.ADMIN_USERNAME?.trim() || "syukie";
+  const password = process.env.ADMIN_PASSWORD;
+  if (!/^[a-zA-Z0-9_.-]{3,80}$/.test(username) || !password || password.length < 12 || password.length > 200) {
+    throw new Error("Configure ADMIN_USERNAME and an ADMIN_PASSWORD of 12–200 characters on the server.");
   }
 
-  const { data, error } = await supabaseAdmin().rpc("create_first_admin", {
+  const { error } = await client.rpc("create_first_admin", {
     p_username: username,
     p_password_hash: await bcrypt.hash(password, 12),
   });
-  if (error) errorRedirect("/admin/setup", new Error(`Admin setup failed: ${error.message}`));
-  if (!data) errorRedirect("/admin/setup", new Error("An administrator account already exists."));
-  revalidatePath("/admin");
-  redirect("/admin/login?created=1");
+  if (error) throw new Error("The administrator account could not be initialized.");
 }
 
 export async function loginAdmin(formData: FormData): Promise<void> {
@@ -125,6 +122,12 @@ export async function loginAdmin(formData: FormData): Promise<void> {
   if (rateError) errorRedirect("/admin/login", new Error("The sign-in service is unavailable."));
   if (rateLimit?.locked_until && new Date(rateLimit.locked_until) > new Date()) {
     errorRedirect("/admin/login", new Error("Too many attempts. Please wait 15 minutes before trying again."));
+  }
+
+  try {
+    await provisionConfiguredAdmin();
+  } catch (error) {
+    errorRedirect("/admin/login", error);
   }
 
   const { data: admin, error } = await client
